@@ -21,8 +21,42 @@ def close_connection(exception):
 
 @app.route('/')
 def index():
+    return render_template('index.html')  
+    
+#after a button is pressed, redirect to that html page
+@app.route('/redirect/<destination>')
+def redirect_page(destination):
+    if destination == 'signup':
+        return redirect(url_for('signup_page'))
+    elif destination == 'login':
+        return redirect(url_for('login_page'))
+
+#html pages for login and signup pages
+@app.route('/signup')
+def signup_page():
+    return render_template('signup.html')
+
+@app.route('/login')
+def login_page():
     return render_template('login.html')
 
+#functions for when you post the form
+@app.route('/signup', methods=['POST'])
+def signup():
+    username = request.form['username']
+    password = request.form['password']
+    confirm_password = request.form['password2']
+    
+    if password == confirm_password:
+        db = get_db()
+        cur = db.cursor()
+
+        cur.execute("INSERT INTO users (username, password) VALUES(?, ?)", (username, password))
+        db.commit()
+        return redirect(url_for('dashboard'))
+    
+    else:
+        return "Passwords do not match"
 
 # Define the login route
 @app.route('/login', methods=['POST'])
